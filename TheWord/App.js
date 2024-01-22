@@ -1,5 +1,8 @@
+import React from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, PixelRatio} from 'react-native';
+import VerseTitle from './components/VerseTitle.js'
+import Verse from './components/Verse.js'
 
 const fontScale = PixelRatio.getFontScale();
 const getFontSize = size => size / fontScale;
@@ -7,8 +10,8 @@ const getFontSize = size => size / fontScale;
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>John 3:16 NIV</Text>
-      <Text style={styles.baseText}><Text style={styles.subScript}>16</Text>For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</Text>
+      <VerseTitle/>
+      <Verse/>
       <StatusBar style="auto" />
     </View>
   );
