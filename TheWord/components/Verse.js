@@ -2,7 +2,7 @@ import {Text, StyleSheet, PixelRatio} from 'react-native';
 
 export default function Verse({info}) {
 	return (
-		<Text style={styles.Text}><Text style={styles.SubScript}>{info.verseNum}</Text>{info.verse}</Text>
+		<Text style={styles.Text}><Text style={styles.SubScript}>{info.verseNum} </Text>{info.verse}</Text>
 	);
 }
 
@@ -16,8 +16,6 @@ const styles = StyleSheet.create({
 		paddingTop: '5%',
 		paddingLeft: '5%',
 		paddingRight: '5%',
-		position: 'flex',
-		textAlight: 'center',
 		fontSize: getFontSize(24),
 		fontWeight: '400',
 		fontFamily: 'Helvetica',
@@ -26,7 +24,6 @@ const styles = StyleSheet.create({
 		color: 'white',
 		fontFamily: 'Helvetica',
 		fontWeight: '400',
-		textAlight: 'center',
 		fontSize: getFontSize(14),
 	},
 });

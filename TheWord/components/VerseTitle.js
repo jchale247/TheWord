@@ -16,5 +16,6 @@ const styles = StyleSheet.create({
 		fontSize: getFontSize(30),
 		fontWeight: 'bold',
 		fontFamily: 'Helvetica',
+		textAlign: 'center',
 	},
 });

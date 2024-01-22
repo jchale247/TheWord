@@ -27,28 +27,4 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  titleText: {
-    fontSize: getFontSize(30),
-    color: 'white',
-    fontWeight: 'bold',
-    fontFamily: 'Helvetica',
-  },
-  baseText: {
-    color: 'white',
-    paddingTop: '5%',
-    fontFamily: 'Helvetica',
-    fontWeight: '400',
-    textAlign: 'center',
-    fontSize: getFontSize(24),
-    paddingLeft: '5%',
-    paddingRight: '5%',
-    position: 'flex',
-  },
-  subScript: {
-    color: 'white',
-    fontFamily: 'Helvetica',
-    fontWeight: '400',
-    textAlign: 'center',
-    fontSize: getFontSize(14),
-  }
 });
