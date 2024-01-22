@@ -10,8 +10,8 @@ const getFontSize = size => size / fontScale;
 export default function App() {
   return (
     <View style={styles.container}>
-      <VerseTitle/>
-      <Verse/>
+      <VerseTitle info={{title: 'John 3:16 NIV'}}/>
+      <Verse info={{verse: 'For God so loved the world that he gave his...', verseNum: '16'}}/>
       <StatusBar style="auto" />
     </View>
   );

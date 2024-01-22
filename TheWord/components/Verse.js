@@ -1,8 +1,8 @@
 import {Text, StyleSheet, PixelRatio} from 'react-native';
 
-export default function Verse() {
+export default function Verse({info}) {
 	return (
-		<Text style={styles.Text}><Text style={styles.SubScript}>16</Text>For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.</Text>
+		<Text style={styles.Text}><Text style={styles.SubScript}>{info.verseNum}</Text>{info.verse}</Text>
 	);
 }
 

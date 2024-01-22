@@ -1,8 +1,8 @@
 import {Text, StyleSheet, PixelRatio} from 'react-native';
 
-export default function VerseTitle() {
+export default function VerseTitle({info}) {
 	return (
-		<Text style={styles.Text}>John 3:16 NIV</Text>
+		<Text style={styles.Text}>{info.title}</Text>
 	);
 }
 
