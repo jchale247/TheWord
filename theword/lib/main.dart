@@ -2,23 +2,69 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() {
   runApp(BibleVerseApp());
 }
 
 class BibleVerseApp extends StatelessWidget {
+  final ValueNotifier<ThemeMode> _themeMode = ValueNotifier(ThemeMode.light);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Bible Verse App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: VerseScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: _themeMode,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          title: 'TheWord',
+          themeMode: mode,
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: Color(0xFFFDFDFD),
+            primarySwatch: Colors.indigo,
+            textTheme: GoogleFonts.merriweatherTextTheme().apply(
+              bodyColor: Colors.black87,
+              displayColor: Colors.black87,
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black87,
+              elevation: 0.5,
+            ),
+            cardColor: Colors.white,
+            iconTheme: IconThemeData(color: Colors.grey[800]),
+          ),
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: Color(0xFF121212),
+            primarySwatch: Colors.indigo,
+            textTheme: GoogleFonts.merriweatherTextTheme().apply(
+              bodyColor: Colors.white,
+              displayColor: Colors.white,
+            ),
+            appBarTheme: AppBarTheme(
+              backgroundColor: Color(0xFF1E1E1E),
+              foregroundColor: Colors.white,
+            ),
+            cardColor: Color(0xFF1E1E1E),
+            iconTheme: IconThemeData(color: Colors.white),
+          ),
+          home: VerseScreen(onToggleTheme: () {
+            _themeMode.value = _themeMode.value == ThemeMode.light
+                ? ThemeMode.dark
+                : ThemeMode.light;
+          }),
+        );
+      },
     );
   }
 }
 
 class VerseScreen extends StatefulWidget {
+  final VoidCallback onToggleTheme;
+  VerseScreen({required this.onToggleTheme});
+
   @override
   _VerseScreenState createState() => _VerseScreenState();
 }
@@ -36,29 +82,29 @@ class _VerseScreenState extends State<VerseScreen> {
   }
 
   Future<void> _fetchVerse() async {
-    final url = Uri.parse('https://labs.bible.org/api/?passage=votd&type=json');
-    final response = await http.get(url);
+    try {
+      final url = Uri.parse('https://labs.bible.org/api/?passage=votd');
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      final body = response.body;
-      final regex = RegExp(r"<b>(.*?)<\/b>\s*(.*)");
-      final match = regex.firstMatch(body);
+      if (response.statusCode == 200) {
+        final body = response.body;
+        final regex = RegExp(r"<b>(.*?)<\/b>\s*(.*)");
+        final match = regex.firstMatch(body);
 
-      if (match != null) {
         setState(() {
-          _verseRef = match.group(1)!;
-          _verseText = match.group(2)!;
+          _verseRef = match?.group(1)?.trim() ?? 'Unknown';
+          _verseText = match?.group(2)?.trim() ?? body.trim();
         });
       } else {
         setState(() {
-          _verseRef = 'Unknown';
-          _verseText = body.trim();
+          _verseRef = '';
+          _verseText = 'Failed to load verse.';
         });
       }
-    } else {
+    } catch (e) {
       setState(() {
         _verseRef = '';
-        _verseText = 'Failed to load verse.';
+        _verseText = 'Error fetching verse: $e';
       });
     }
   }
@@ -75,8 +121,7 @@ class _VerseScreenState extends State<VerseScreen> {
     await prefs.setStringList('favorites', _favorites);
   }
 
-  String get _currentVerseKey => '$_verseRef - $_verseText';
-
+  String get _currentVerseKey => '${_verseRef.trim()} - ${_verseText.trim()}';
   bool get _isFavorite => _favorites.contains(_currentVerseKey);
 
   Future<void> _toggleFavorite() async {
@@ -90,32 +135,50 @@ class _VerseScreenState extends State<VerseScreen> {
     await _saveFavorites();
   }
 
-  // Updated remove method with validation
   Future<void> _removeFavorite(int index) async {
-  if (index >= 0 && index < _favorites.length) {
-    setState(() {
-      _favorites.removeAt(index);
-    });
-    await _saveFavorites();
-    Navigator.pop(context); // Close the modal immediately after removing the verse
-    _showFavorites(); // Reopen the modal to reflect the updated list
+    if (index >= 0 && index < _favorites.length) {
+      setState(() {
+        _favorites.removeAt(index);
+      });
+      await _saveFavorites();
+      Navigator.pop(context);
+      _showFavorites();
+    }
   }
-}
 
   void _showFavorites() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => ListView.builder(
-        itemCount: _favorites.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(_favorites[index]),
-            trailing: IconButton(
-              icon: Icon(Icons.close),
-              onPressed: () => _removeFavorite(index), // Remove item and update live
-            ),
-          );
-        },
+      backgroundColor: Theme.of(context).cardColor,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: _favorites.isEmpty
+            ? Center(child: Text('No favorites yet.'))
+            : ListView.builder(
+                itemCount: _favorites.length,
+                itemBuilder: (context, index) => Container(
+                  margin: EdgeInsets.symmetric(vertical: 6),
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(child: Text(_favorites[index])),
+                      IconButton(
+                        icon: Icon(Icons.close, color: Colors.redAccent),
+                        onPressed: () => _removeFavorite(index),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -124,50 +187,55 @@ class _VerseScreenState extends State<VerseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daily Bible Verse'),
+        title: Text('TheWord'),
         actions: [
-          IconButton(
-            icon: Icon(Icons.list),
-            onPressed: _showFavorites,
-          )
+          IconButton(icon: Icon(Icons.refresh), onPressed: _fetchVerse, tooltip: "Refresh",),
+          IconButton(icon: Icon(Icons.list), onPressed: _showFavorites, tooltip: "Show Favorites List",),
+          IconButton(icon: Icon(Icons.brightness_6), onPressed: widget.onToggleTheme, tooltip: "Toggle Theme",),
         ],
       ),
       body: Center(
         child: _verseText.isEmpty
             ? CircularProgressIndicator()
             : Card(
-                margin: EdgeInsets.all(16),
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                margin: EdgeInsets.all(20),
                 child: Padding(
-                  padding: const EdgeInsets.all(20.0),
+                  padding: const EdgeInsets.all(24.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         _verseText,
-                        style: TextStyle(fontSize: 18),
+                        style: GoogleFonts.merriweather(fontSize: 18, height: 1.5),
                         textAlign: TextAlign.center,
                       ),
                       SizedBox(height: 10),
                       Text(
                         _verseRef,
-                        style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontStyle: FontStyle.italic,
+                          color: Theme.of(context).textTheme.bodySmall?.color,
+                        ),
                       ),
                       SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          IconButton(
-                            icon: Icon(
-                              _isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: Colors.red,
-                            ),
-                            onPressed: _toggleFavorite,
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 300),
+                        child: IconButton(
+                          key: ValueKey(_isFavorite),
+                          icon: Icon(
+                            _isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: Colors.pinkAccent,
+                            size: 28,
                           ),
-                          ElevatedButton(
-                            onPressed: _fetchVerse,
-                            child: Text('New Verse'),
-                          ),
-                        ],
+                          onPressed: _toggleFavorite,
+                        ),
                       )
                     ],
                   ),
