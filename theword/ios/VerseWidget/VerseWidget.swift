@@ -40,20 +40,20 @@ struct VerseWidgetEntryView: View {
             VStack(alignment: .center, spacing: 6) {
                 // Verse Text
                 Text(entry.verseText)
-                    .font(.system(size: min(geometry.size.width / 10, 16))) // Adjust font size dynamically
+                    .font(.system(size: min(geometry.size.width / 10, 16)))
                     .multilineTextAlignment(.center)
-                    .lineLimit(nil) // Allow text to wrap across multiple lines
-                    .fixedSize(horizontal: false, vertical: true) // Ensure it doesn't get clipped
+                    .lineLimit(nil)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 // Verse Reference
                 Text(entry.verseRef)
                     .font(.caption)
                     .foregroundColor(.blue)
-                    .lineLimit(1) // Limit the reference text to one line
+                    .lineLimit(1)
             }
             .padding(.horizontal, 12) // Add horizontal padding to avoid text touching sides
-            .padding(.vertical, 12)  // Add vertical padding to ensure equal top and bottom space
-            .frame(width: geometry.size.width) // Ensure widget uses full width
+            .padding(.vertical, 12)  // Add vertical padding to for equal top and bottom space
+            .frame(width: geometry.size.width) //widget uses full width
         }
         .containerBackground(.fill.tertiary, for: .widget)
     }

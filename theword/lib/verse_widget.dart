@@ -8,10 +8,7 @@ void main() {
 class VerseWidgetApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Verse Widget',
-      home: Container(), // No UI needed for the main widget app
-    );
+    return MaterialApp(title: 'Verse Widget', home: Container());
   }
 }
 
@@ -36,7 +33,7 @@ class VerseWidget extends StatelessWidget {
               style: TextStyle(fontSize: 18, color: Colors.black),
               children: [
                 TextSpan(
-                  text: verseRef.split(":").last, // Extract the verse number
+                  text: verseRef.split(":").last,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.blue,
