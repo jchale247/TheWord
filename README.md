@@ -6,6 +6,7 @@ The Word is a Daily Bible Verse application using Flutter for a multi-platform s
 </p>
 <h2 align="center">Locally Stored Favorites List</h2>
 <p align="center">
+<img src="https://github.com/user-attachments/assets/d138aeb4-3352-49a3-832c-727773f1e7fa" width="300">
 <img src="https://github.com/user-attachments/assets/99925d2a-a27f-4444-9017-b6b26f3e68da" width="300">
 </p>
 <h2 align="center">IOS HomePage Widget</h2>
