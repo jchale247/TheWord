@@ -1,0 +1,9 @@
+flutter_native_splash:
+  android: true
+  ios: true
+
+  color: "#f2f4f3"
+  image: "assets/TheWordLogo.png"
+  branding: "assets/TheWordBranding.png"
+
+  color_dark: "#1E1E1E"

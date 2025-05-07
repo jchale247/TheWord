@@ -10,8 +10,32 @@ void main() {
   runApp(TheWord());
 }
 
-class TheWord extends StatelessWidget {
+class TheWord extends StatefulWidget {
+  @override
+  _TheWordState createState() => _TheWordState();
+}
+
+class _TheWordState extends State<TheWord> {
   final ValueNotifier<ThemeMode> _themeMode = ValueNotifier(ThemeMode.light);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('isDarkMode') ?? false;
+    _themeMode.value = isDark ? ThemeMode.dark : ThemeMode.light;
+  }
+
+  Future<void> _toggleTheme() async {
+    final isDark = _themeMode.value == ThemeMode.dark;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', !isDark);
+    _themeMode.value = !isDark ? ThemeMode.dark : ThemeMode.light;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,14 +77,7 @@ class TheWord extends StatelessWidget {
             cardColor: Color(0xFF1E1E1E),
             iconTheme: IconThemeData(color: Colors.white),
           ),
-          home: VerseScreen(
-            onToggleTheme: () {
-              _themeMode.value =
-                  _themeMode.value == ThemeMode.light
-                      ? ThemeMode.dark
-                      : ThemeMode.light;
-            },
-          ),
+          home: VerseScreen(onToggleTheme: _toggleTheme),
         );
       },
     );
@@ -79,12 +96,14 @@ class _VerseScreenState extends State<VerseScreen> {
   String _verseText = '';
   String _verseRef = '';
   List<String> _favorites = [];
+  ThemeMode _themeMode = ThemeMode.light;
 
   @override
   void initState() {
     super.initState();
     _fetchVerse();
     _loadFavorites();
+    _loadTheme();
   }
 
   Future<void> _fetchVerse() async {
@@ -119,10 +138,14 @@ class _VerseScreenState extends State<VerseScreen> {
           _verseText = verseText;
         });
 
-        // Push to Home Widget
+        // Save and update the widget
         await HomeWidget.setAppGroupId('group.com.JCH.theword');
         await HomeWidget.saveWidgetData<String>('verseText', verseText);
         await HomeWidget.saveWidgetData<String>('verseRef', verseRef);
+        await HomeWidget.updateWidget(
+          name: 'VerseWidget',
+          iOSName: 'VerseWidget',
+        );
       } else {
         setState(() {
           _verseRef = '';
@@ -220,6 +243,23 @@ class _VerseScreenState extends State<VerseScreen> {
                     ),
           ),
     );
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool('isDarkMode') ?? false;
+    setState(() {
+      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  void _toggleTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = _themeMode == ThemeMode.dark;
+    setState(() {
+      _themeMode = isDark ? ThemeMode.light : ThemeMode.dark;
+    });
+    await prefs.setBool('isDarkMode', !isDark);
   }
 
   @override

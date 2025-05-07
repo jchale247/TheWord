@@ -9,56 +9,47 @@ struct VerseEntry: TimelineEntry {
 
 struct VerseProvider: TimelineProvider {
     func placeholder(in context: Context) -> VerseEntry {
-        return VerseEntry(date: Date(), verseText: "Placeholder verse text", verseRef: "John 3:16")
+        VerseEntry(date: Date(), verseText: "Default Verse", verseRef: "John 3:16")
     }
 
     func getSnapshot(in context: Context, completion: @escaping (VerseEntry) -> Void) {
-        let entry = VerseEntry(date: Date(), verseText: "Snapshot verse text", verseRef: "John 3:16")
+        let entry = loadVerseEntry()
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<VerseEntry>) -> Void) {
-        // Access the shared app group to get the verse data
-        let sharedDefaults = UserDefaults(suiteName: "group.com.JCH.theword")
-        
-        // Get the verse data from the shared container
-        let verseText = sharedDefaults?.string(forKey: "verseText") ?? "Default verse"
-        let verseRef = sharedDefaults?.string(forKey: "verseRef") ?? "John 3:16"
-        
-        let entry = VerseEntry(date: Date(), verseText: verseText, verseRef: verseRef)
+        let entry = loadVerseEntry()
         let timeline = Timeline(entries: [entry], policy: .atEnd)
         completion(timeline)
     }
-}
 
-
-struct VerseWidgetEntryView: View {
-    var entry: VerseProvider.Entry
-
-    var body: some View {
-        GeometryReader { geometry in
-            VStack(alignment: .center, spacing: 6) {
-                // Verse Text
-                Text(entry.verseText)
-                    .font(.system(size: min(geometry.size.width / 10, 16)))
-                    .multilineTextAlignment(.center)
-                    .lineLimit(nil)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                // Verse Reference
-                Text(entry.verseRef)
-                    .font(.caption)
-                    .foregroundColor(.blue)
-                    .lineLimit(1)
-            }
-            .padding(.horizontal, 12) // Add horizontal padding to avoid text touching sides
-            .padding(.vertical, 12)  // Add vertical padding to for equal top and bottom space
-            .frame(width: geometry.size.width) //widget uses full width
-        }
-        .containerBackground(.fill.tertiary, for: .widget)
+    private func loadVerseEntry() -> VerseEntry {
+        let defaults = UserDefaults(suiteName: "group.com.JCH.theword")
+        let text = defaults?.string(forKey: "verseText") ?? "Default Verse"
+        let ref = defaults?.string(forKey: "verseRef") ?? "John 3:16"
+        return VerseEntry(date: Date(), verseText: text, verseRef: ref)
     }
 }
 
+struct VerseWidgetEntryView: View {
+    var entry: VerseEntry
+
+    var body: some View {
+        VStack(spacing: 12) {
+            Text(entry.verseText)
+                .font(.system(size: 14))
+                .multilineTextAlignment(.center)
+                .lineLimit(nil)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text(entry.verseRef)
+                .font(.footnote)
+                .foregroundColor(.blue)
+        }
+        .padding()
+        .containerBackground(.fill.tertiary, for: .widget)
+    }
+}
 
 @main
 struct VerseWidget: Widget {
@@ -68,8 +59,8 @@ struct VerseWidget: Widget {
         StaticConfiguration(kind: kind, provider: VerseProvider()) { entry in
             VerseWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("Verse of the Day")
-        .description("Displays the verse and reference.")
+        .configurationDisplayName("Daily Verse")
+        .description("Displays a daily Bible verse using the NET translation.")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
